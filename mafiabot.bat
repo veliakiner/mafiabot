@@ -1,0 +1,1 @@
+mafiabot.py irc.synirc.net:6667 #fluodome mafia
