@@ -1000,6 +1000,8 @@ class TestBot(SingleServerIRCBot):
         if winner_team:
             self.say(irc, "Game over! " + " ".join(winners) + " (the " + winner_team + ") won!")
             self.begin_idle(irc)
+        elif len(self.players)==0:
+            self.say(irc, "The game ended in a tie.")
         else:
             self.begin_talk(irc)
 
