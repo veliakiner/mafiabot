@@ -649,7 +649,11 @@ class TestBot(SingleServerIRCBot):
                     self.kill_player(self.silenced.nick, c)
                 self.silence = 0
                 self.silenced = 0
-                if self.state == 'vote':
+                winner_team, winners = self.winner()
+                if winner_team:
+                    self.say(c, "Game over! " + " ".join(winners) + " (the " + winner_team + ") won!")
+                    self.begin_idle(c)
+                elif self.state == 'vote':
                     self.say(c,"Voting will now restart.")
                     self.timer.cancel()
                     self.begin_vote(c)
