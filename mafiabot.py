@@ -746,15 +746,16 @@ class TestBot(SingleServerIRCBot):
             return
     def update(self):
         mafiabot_url="https://raw.githubusercontent.com/veliakiner/mafiabot/master/mafiabot.py"
-        response = urllib2.urlopen(mafiabot_url)
-        mafiabot_github = response.read()
-        mafiabot_local = open("mafiabot.py")
-        mafiabot_local.close()
-        if mafiabot_github == mafiabot_local:
+        mafiabot_git = urllib2.urlopen(mafiabot_url)
+        mafiabot_git_data = mafiabot_git.read()
+        mafiabot_loc = open("mafiabot.py")
+        mafiabot_loc_data = mafiabot_loc.read()
+        mafiabot_loc.close()
+        if mafiabot_git_data == mafiabot_loc_data:
             print "version up to date"
         else:
             f = open("mafiabot.py","w")
-            f.write(mafiabot_github)
+            f.write(mafiabot_git_data)
             f.close()
         subprocess.Popen("mafiabot.bat")
         self.die()
