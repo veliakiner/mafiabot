@@ -53,6 +53,15 @@ class Player:
         self.hooked = 0
         self.protected = 0
 
+class Nick(str):
+    def __add__(self, x):
+        return "\002\037" + str(self) + "\037\002"+x
+    def __radd__(self, x):
+        return x+"\002\037" + str(self) + "\037\002"
+
+def nick_list(nicks, separator=" "):
+    return separator.join([nick+"" for nick in nicks])
+
 class Group:
     def __init__(self,**k):
         self.__dict__ = k
@@ -137,7 +146,7 @@ class Mafia(Group):
                 return
             if target.group.role == 'bpv' or target.group.name == 'ghost':
                 for player in self.members:
-                    irc.notice(player.nick,"Your target was protected.")		
+                    irc.notice(player.nick,"Your target was protected.")        
                 return
             if target.group.role == 'rogue':
 #if target.group.stalked == self.killer:
@@ -196,7 +205,7 @@ class Werewolf(Group):
                 return
             if target.group.role == 'bpv' or target.group.name == 'ghost':
                 for player in self.members:
-                    irc.notice(player.nick,"Your target was protected.")		
+                    irc.notice(player.nick,"Your target was protected.")        
                 return
             if target.group.role == 'rogue':
                 for player in self.members:
@@ -300,7 +309,7 @@ class Martyr(Group):
         self.last_target = None
         for player in self.members:
             irc.notice(player.nick,"You have chosen to idle.")
-			
+            
 class Ghost(Group):
     def __init__(self):
         Group.__init__(self, name='villager',
@@ -488,7 +497,7 @@ class Twin(Mafia):
             return
 
     def execute_kill(self,game,target,irc):
-        Mafia.execute_kill(self,game,target,irc)			
+        Mafia.execute_kill(self,game,target,irc)            
 
 class Joker(Mafia):
     def __init__(self):
@@ -519,7 +528,7 @@ class Joker(Mafia):
             return
 
     def execute_kill(self,game,target,irc):
-        Mafia.execute_kill(self,game,target,irc)			
+        Mafia.execute_kill(self,game,target,irc)            
 
 class Silencer(Group):
     def __init__(self,gang):
@@ -597,13 +606,14 @@ def bind(f,arg):
     def f2():
         f(arg)
     return f2
+    
 
 class TestBot(SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
         SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
 
-        self.time_join =60
+        self.time_join = 60
         self.time_night = 45
         self.time_talk = 3
         self.time_silence = 27
@@ -651,7 +661,7 @@ class TestBot(SingleServerIRCBot):
                 self.silenced = 0
                 winner_team, winners = self.winner()
                 if winner_team:
-                    self.say(c, "Game over! " + " ".join(winners) + " (the " + winner_team + ") won!")
+                    self.say(c, "Game over! " + nick_list(winners, " ") + " (the " + winner_team + ") won!")
                     self.begin_idle(c)
                 elif self.state == 'vote':
                     self.say(c,"Voting will now restart.")
@@ -733,12 +743,7 @@ class TestBot(SingleServerIRCBot):
 
 
     def say(self,irc,text):
-        irc.privmsg(self.channel,"\00312"+self.highlight_players(text))
-
-    def highlight_players(self,text):
-        for nick in self.players.keys():
-            text = text.replace(nick,"\002\037" + nick + "\037\002")
-        return text
+        irc.privmsg(self.channel,"\00312"+text)
 
     def schedule(self,time,f):
         if self.timer:
@@ -791,6 +796,7 @@ class TestBot(SingleServerIRCBot):
 #         self.timer.start()
 
     def do_registering(self,nick,cmd,args,irc):
+        nick=Nick(nick)
         if cmd == 'join':
             if self.players.has_key(nick):
                 irc.notice(nick, "You already joined!")
@@ -832,13 +838,13 @@ class TestBot(SingleServerIRCBot):
         for nick,player in players.items():
             if len(player.group.members) > 1:
                 irc.notice(nick,"You are: " + player.group.name + ". " + player.group.description +
-                                " Your partner(s) is/are: " + ' '.join(filter(lambda x:x!=nick,map(lambda x:x.nick, player.group.members))))
+                                " Your partner(s) is/are: " + nick_list(filter(lambda x:x!=nick,map(lambda x:x.nick, player.group.members))), " ")
                 if self.silencer and self.silencer.team == player.group.team:
                     irc.notice(nick,"You also have a silencer working with your team, he is: " + self.silencer.nick)
             elif player.group.role == 'silencer':
                 for nick2,player2 in players.items():
                     if player2.group.team == player.group.team and player != player2:
-                        irc.notice(nick, "You are: " + player.group.name + ". " + player.group.description + " Your partners are: "  + ' '.join(filter(lambda x:x!=nick,map(lambda x:x.nick, player2.group.members))))
+                        irc.notice(nick, "You are: " + player.group.name + ". " + player.group.description + " Your partners are: "  + nick_list(filter(lambda x:x!=nick,map(lambda x:x.nick, player2.group.members)))," ")
                         break
             elif player.group.role == 'devil':
                 irc.notice(nick,"You are: " + player.group.name + ", " + player.group.description +
@@ -942,7 +948,7 @@ class TestBot(SingleServerIRCBot):
 
     def begin_night(self,irc):
         self.state = 'night'
-        self.say(irc,"The night starts! The players still alive are: " + ', '.join(self.players.keys()) +
+        self.say(irc,"The night starts! The players still alive are: " + nick_list(self.players.keys(), ', ') +
                      ". The night will end in " + str(self.time_night) + " seconds.")
         self.nightno += 1
         if self.nightno == 2:
@@ -1002,7 +1008,7 @@ class TestBot(SingleServerIRCBot):
             self.say(irc, "Nobody was killed.")
         winner_team, winners = self.winner()
         if winner_team:
-            self.say(irc, "Game over! " + " ".join(winners) + " (the " + winner_team + ") won!")
+            self.say(irc, "Game over! " + nick_list(winners, " ") + " (the " + winner_team + ") won!")
             self.begin_idle(irc)
         elif len(self.players)==0:
             self.say(irc, "The game ended in a tie.")
@@ -1051,7 +1057,7 @@ class TestBot(SingleServerIRCBot):
     def begin_talk(self,irc):
         self.state = 'talk'
         self.say(irc,"The day starts! The players still alive are: " +
-                     ', '.join(self.players.keys()) + '. You can deliberate for the next ' + str(self.time_talk + self.time_silence) + ' seconds.')
+                     nick_list(self.players.keys(), ", ") + '. You can deliberate for the next ' + str(self.time_talk + self.time_silence) + ' seconds.')
         self.timer = Timer(self.time_talk,bind(self.begin_silence,irc))
         self.timer.start()
 
@@ -1178,13 +1184,13 @@ class TestBot(SingleServerIRCBot):
                     else:
                         self.say(irc,"Looks like " + victim + " is already dead!")
         else:
-            self.say(irc, "There is a tie between: " + ", ".join(map(lambda x:x[0],tally)) + ". Nobody is going to be lynched.")
+            self.say(irc, "There is a tie between: " + nick_list(map(lambda x:x[0],tally), ", ") + ". Nobody is going to be lynched.")
 #             r = randint(0,len(tally)-1)
 #             victim = tally[r][0]
 #         self.kill_player(victim,irc)
         winner_team, winners = self.winner()
         if winner_team:
-            self.say(irc, "Game over! " + " ".join(winners) + " (the " + winner_team + ") won!")
+            self.say(irc, "Game over! " + nick_list(winners, ", ") + " (the " + winner_team + ") won!")
             self.begin_idle(irc)
         else:
             self.begin_night(irc)
