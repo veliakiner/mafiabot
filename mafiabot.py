@@ -8,6 +8,8 @@ from random import randint, shuffle
 from threading import Timer
 from copy import copy
 from collections import defaultdict
+import subprocess
+import urllib2
 
 # mafia - work in a team, they can kill somebody or corrupt the narrator
 # inspector - asks to discover the identity of a player (and on which side he is), gets wrong clues if the narrator was corrupted
@@ -736,11 +738,26 @@ class TestBot(SingleServerIRCBot):
                 c.notice(nick,"To start a game type \037!mafia\037. To join a game type \037!join\037.")
                 c.notice(nick,"For the various commands, either type '!command target' in main chat or pm the bot with 'command target' where command can be either: \037vote\037 / \037kill\037 / \037fuck\037 / \037protect\037 / \037inspect\037 / \037check\037 / \037distract\037 / \037stalk\037 / \037spook\037 / \037silence\037 and target is the person it is directed towards.")
                 c.notice(nick,"\037!reset\037 to reset the mafia game!")
+            elif line[0] == "update" and nick == "cookie":
+                self.update()
             else:
                 getattr(self, 'do_' + self.state)(nick,line[0],line[1:],c)
         except IndexError:
             return
-
+    def update(self):
+        mafiabot_url="https://raw.githubusercontent.com/veliakiner/mafiabot/master/mafiabot.py"
+        response = urllib2.urlopen(mafiabot_url)
+        mafiabot_github = response.read()
+        mafiabot_local = open("mafiabot.py")
+        mafiabot_local.close()
+        if mafiabot_github == mafiabot_local:
+            print "version up to date"
+        else:
+            f = open("mafiabot.py","w")
+            f.write(mafiabot_github)
+            f.close()
+        subprocess.Popen("mafiabot.bat")
+        self.die()
 
     def say(self,irc,text):
         irc.privmsg(self.channel,"\00312"+text)
