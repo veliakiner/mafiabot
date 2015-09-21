@@ -856,7 +856,7 @@ class TestBot(SingleServerIRCBot):
         for nick,player in players.items():
             if len(player.group.members) > 1:
                 irc.notice(nick,"You are: " + player.group.name + ". " + player.group.description +
-                                " Your partner(s) is/are: " + nick_list(filter(lambda x:x!=nick,map(lambda x:x.nick, player.group.members))), " ")
+                                " Your partner(s) is/are: " + nick_list(filter(lambda x:x!=nick,map(lambda x:x.nick, player.group.members)), " "))
                 if self.silencer and self.silencer.team == player.group.team:
                     irc.notice(nick,"You also have a silencer working with your team, he is: " + self.silencer.nick)
             elif player.group.role == 'silencer':
