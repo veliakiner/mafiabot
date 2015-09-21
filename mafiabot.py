@@ -1136,12 +1136,12 @@ class TestBot(SingleServerIRCBot):
                         irc.notice(nick, "Sorry, you have been silenced and cannot vote.")
                     elif self.players.has_key(args[0]):
                         self.players[nick].vote = args[0]
-                        self.say(irc, nick + " has voted for " + Nick(args[0])
+                        self.say(irc, nick + " has voted for " + Nick(args[0]))
                     else:
                         irc.notice(nick, args[0] + " is not playing or has been killed.")
                 elif self.players.has_key(args[0]):
                     self.players[nick].vote = args[0]
-                    self.say(irc, nick + " has voted for " + Nick(args[0])
+                    self.say(irc, nick + " has voted for " + Nick(args[0]))
                 else:
                     irc.notice(nick, args[0] + " is not playing or has been killed.")
             else:
