@@ -738,8 +738,8 @@ class TestBot(SingleServerIRCBot):
                 c.notice(nick,"To start a game type \037!mafia\037. To join a game type \037!join\037.")
                 c.notice(nick,"For the various commands, either type '!command target' in main chat or pm the bot with 'command target' where command can be either: \037vote\037 / \037kill\037 / \037fuck\037 / \037protect\037 / \037inspect\037 / \037check\037 / \037distract\037 / \037stalk\037 / \037spook\037 / \037silence\037 and target is the person it is directed towards.")
                 c.notice(nick,"\037!reset\037 to reset the mafia game!")
-            elif line[0] == "update" and nick == "cookie":
-                self.update()
+            # elif line[0] == "update" and nick == "cookie":
+            #     self.update()
             else:
                 getattr(self, 'do_' + self.state)(nick,line[0],line[1:],c)
         except IndexError:
