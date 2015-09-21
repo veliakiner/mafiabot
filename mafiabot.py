@@ -810,8 +810,8 @@ class TestBot(SingleServerIRCBot):
         self.say(irc, "A new game was started! Type '/msg " + irc.get_nickname() + " join' or !join to join! You have " + str(self.time_join) + " seconds to join.")
         irc.notice(self.channel, "Join!")
         self.schedule(self.time_join,bind(self.initialize_game,irc))
-#         self.timer = Timer(self.time_join,bind(self.initialize_game,irc))
-#         self.timer.start()
+        self.timer = Timer(self.time_join,bind(self.initialize_game,irc))
+        self.timer.start()
 
     def do_registering(self,nick,cmd,args,irc):
         nick=Nick(nick)
