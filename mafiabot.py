@@ -1122,6 +1122,7 @@ class TestBot(SingleServerIRCBot):
         self.timer.start()
 
     def do_vote(self,nick,cmd,args,irc):
+        nick=Nick(nick)
         try:
             if cmd == 'vote':
                 if self.players[nick].vote:
@@ -1135,12 +1136,12 @@ class TestBot(SingleServerIRCBot):
                         irc.notice(nick, "Sorry, you have been silenced and cannot vote.")
                     elif self.players.has_key(args[0]):
                         self.players[nick].vote = args[0]
-                        self.say(irc, nick + " has voted for " + args[0])
+                        self.say(irc, nick + " has voted for " + Nick(args[0])
                     else:
                         irc.notice(nick, args[0] + " is not playing or has been killed.")
                 elif self.players.has_key(args[0]):
                     self.players[nick].vote = args[0]
-                    self.say(irc, nick + " has voted for " + args[0])
+                    self.say(irc, nick + " has voted for " + Nick(args[0])
                 else:
                     irc.notice(nick, args[0] + " is not playing or has been killed.")
             else:
@@ -1189,7 +1190,7 @@ class TestBot(SingleServerIRCBot):
                 max = votes
         tally = filter(lambda x:x[1]==max,tally.items())
         if len(tally) == 1:
-            victim = tally[0][0]
+            victim = Nick(tally[0][0])
             if self.players[victim].group.name == 'ghost':
                 self.say(irc,victim + " (ghost) was killed!")
                 self.say(irc,"But Uh-oh, a ghost is already dead. " + victim + " shall exist among us forever.")
@@ -1202,7 +1203,9 @@ class TestBot(SingleServerIRCBot):
                     else:
                         self.say(irc,"Looks like " + victim + " is already dead!")
         else:
-            self.say(irc, "There is a tie between: " + nick_list(map(lambda x:x[0],tally), ", ") + ". Nobody is going to be lynched.")
+            tied_nicks = map(lambda x:x[0],tally)
+            tied_nicks = [Nick(nick) for nick in tied_nicks]
+            self.say(irc, "There is a tie between: " + nick_list(tied_nicks, ", ") + ". Nobody is going to be lynched.")
 #             r = randint(0,len(tally)-1)
 #             victim = tally[r][0]
 #         self.kill_player(victim,irc)
