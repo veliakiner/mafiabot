@@ -757,8 +757,8 @@ class TestBot(SingleServerIRCBot):
             f = open("mafiabot.py","w")
             f.write(mafiabot_git_data)
             f.close()
-        subprocess.Popen("mafiabot.bat")
-        self.die()
+            subprocess.Popen("mafiabot.bat")
+            self.die("Updating the bot")
 
     def say(self,irc,text):
         irc.privmsg(self.channel,"\00312"+text)
