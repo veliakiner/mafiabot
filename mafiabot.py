@@ -1030,6 +1030,7 @@ class TestBot(SingleServerIRCBot):
             self.begin_idle(irc)
         elif len(self.players)==0:
             self.say(irc, "The game ended in a tie.")
+            self.begin_idle(irc)
         else:
             self.begin_talk(irc)
 
